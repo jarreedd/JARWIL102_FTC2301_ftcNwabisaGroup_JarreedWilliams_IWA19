@@ -1,6 +1,7 @@
 import { books, genres, authors, BOOKS_PER_PAGE } from "./data.js";
 
 const matches = books
+//
 let page = 1;
 
 // if (!books && !Array.isArray(books)) throw new Error('Source required') 
@@ -110,7 +111,6 @@ const showMore = (event) => {
 
     const rangeStart = (page - 1) * BOOKS_PER_PAGE
     const rangeEnd = books.length - remaining
-
     extracted = books.slice(rangeStart, rangeEnd)
 
     if (hasRemaining > 0) {
@@ -120,10 +120,16 @@ const showMore = (event) => {
         }
         
         document.querySelector("[data-list-items]").appendChild(fragment);
+
+        const previewList = document.querySelectorAll('.preview')
+        const previewArray = Array.from(previewList)
+        for (const preview of previewArray) {
+            preview.addEventListener('click', activePreview)
+        }
     }
     
     showmoreButton.innerHTML = /* html */ `
-    Show more 
+    <span>Show more </span>
     <span class="list__remaining">
         (${hasRemaining})
     </span>
@@ -172,24 +178,46 @@ showmoreButton.addEventListener("click", showMore)
 //     data-settings-overlay).open === false
 // }
 
-// data-list-items.click() {
-//     pathArray = Array.from(event.path || event.composedPath())
-//     active;
+const summary = document.querySelector('[data-list-active]')
+const summaryClose = document.querySelector('[data-list-close]')
+const summaryBackground = document.querySelector('[data-list-blur]')
+const summaryImage = document.querySelector('[data-list-image]')
+const summaryTitle = document.querySelector('[data-list-title]')
+const summarySubtitle = document.querySelector('[data-list-subtitle]')
+const summaryDescription = document.querySelector('[data-list-description]')
 
-//     for (node; pathArray; i++) {
-//         if active break;
-//         const previewId = node?.dataset?.preview
+const activePreview = (event) => {
+    event.preventDefault()
+    let active
+
+    const bookPreview = event.target.closest('.preview')
+    const bookPreviewId = bookPreview.getAttribute('data-preview');
     
-//         for (const singleBook of books) {
-//             if (singleBook.id === id) active = singleBook
-//         } 
-//     }
+    for (const book of books) {
+        if (active) break
+
+        if (book.id === bookPreviewId) {
+            active = book
+        }
+    }
+
+    if (!active) return
+
+    const { title, image, description, published, author } = active
+    summary.showModal()
+    summaryBackground.src = image
+    summaryImage.src = image
+    summaryTitle.innerText = title
+    summarySubtitle.innerText = `${authors[author]} (${new Date(published).getFullYear()})`
+    summaryDescription.innerText = description
     
-//     if !active return
-//     data-list-active.open === true
-//     data-list-blur + data-list-image === active.image
-//     data-list-title === active.title
-    
-//     data-list-subtitle === '${authors[active.author]} (${Date(active.published).year})'
-//     data-list-description === active.description
-// }
+    summaryClose.addEventListener('click', () => {
+        summary.close()
+    })
+}
+
+const previewList = document.querySelectorAll('.preview')
+const previewArray = Array.from(previewList)
+for (const preview of previewArray) {
+    preview.addEventListener('click', activePreview)
+}
