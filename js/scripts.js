@@ -7,15 +7,16 @@ let page = 1;
 // if (!books && !Array.isArray(books)) throw new Error('Source required') 
 // if (!range && range.length < 2) throw new Error('Range must be an array with two numbers')
 
-// const day = {
-//     dark: '10, 10, 20',
-//     light: '255, 255, 255',
-// }
-
-// const night = {
-//     dark: '255, 255, 255',
-//     light: '10, 10, 20',
-// }
+const css = {
+    night : {
+        dark: '255, 255, 255',
+        light: '10, 10, 20'
+    },
+    day : {
+        dark: '10, 10, 20',
+        light: '255, 255, 255'
+    }
+}
 
 const fragment = document.createDocumentFragment()
 let extracted = books.slice(0, BOOKS_PER_PAGE)
@@ -78,11 +79,11 @@ document.querySelector("[data-list-items]").appendChild(fragment);
 
 // data-search-authors.appendChild(authors)
 
-// data-settings-theme.value === window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? 'night' : 'day'
-// v = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches? 'night' | 'day'
+document.querySelector('[data-settings-theme]').value = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? 'day' : 'night'
+let v = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? 'day' : 'night'
 
-// documentElement.style.setProperty('--color-dark', css[v].dark);
-// documentElement.style.setProperty('--color-light', css[v].light);
+document.documentElement.style.setProperty('--color-dark', css[v].dark);
+document.documentElement.style.setProperty('--color-light', css[v].light);
 
 const showmoreButton = document.querySelector('[data-list-button]')
 
@@ -99,8 +100,20 @@ showmoreButton.innerHTML = /* html */ `
 `;
 
 // data-search-cancel.click() { data-search-overlay.open === false }
-// data-settings-cancel.click() { querySelect(data-settings-overlay).open === false }
-// data-settings-form.submit() { actions.settings.submit }
+const showSettings = (event) => {
+    event.preventDefault()
+    settings.showModal()
+
+    settingsCancel.addEventListener('click', () => {
+        settings.close()
+    })
+}
+const settingsButton = document.querySelector('[data-header-settings]')
+const settingsCancel = document.querySelector('[data-settings-cancel]')
+const settings = document.querySelector('[data-settings-overlay]')
+
+settingsButton.addEventListener('click', showSettings)
+
 // data-list-close.click() { data-list-active.open === false }
 
 const showMore = (event) => {
@@ -169,14 +182,20 @@ showmoreButton.addEventListener("click", showMore)
 //     data-search-overlay.open = false
 // }
 
-// data-settings-overlay.submit; {
-//     preventDefault()
-//     const formData = new FormData(event.target)
-//     const result = Object.fromEntries(formData)
-//     document.documentElement.style.setProperty('--color-dark', css[result.theme].dark);
-//     document.documentElement.style.setProperty('--color-light', css[result.theme].light);
-//     data-settings-overlay).open === false
-// }
+const settingsSave = document.querySelector('[data-settings-overlay] [type="submit"]')
+const settingsData = document.querySelector('[data-settings-form]')
+const saveTheme = (event) => { 
+    event.preventDefault()
+    const formData = new FormData(settingsData)
+    const result = Object.fromEntries(formData)
+
+    document.documentElement.style.setProperty('--color-dark', css[result.theme].dark);
+    document.documentElement.style.setProperty('--color-light', css[result.theme].light);
+    
+    settings.close()
+}
+
+settingsSave.addEventListener('click', saveTheme)
 
 const summary = document.querySelector('[data-list-active]')
 const summaryClose = document.querySelector('[data-list-close]')
