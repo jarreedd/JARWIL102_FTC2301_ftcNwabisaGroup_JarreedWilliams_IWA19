@@ -148,20 +148,57 @@ const showMore = (event) => {
 
 showmoreButton.addEventListener("click", showMore) 
 
-const searchButton = document.querySelector('[data-header-search]')
-const searchMenu = document.querySelector('[data-search-overlay]')
-const searchCancel = document.querySelector('[data-search-cancel]')
+const optionsButton = document.querySelector('[data-header-search]')
+const optionsMenu = document.querySelector('[data-search-overlay]')
+const optionsCancel = document.querySelector('[data-search-cancel]')
 
-const showSearchMenu = (event) => {
+const showOptionsMenu = (event) => {
     event.preventDefault()
-    searchMenu.showModal()
+    optionsMenu.showModal()
 
-    searchCancel.addEventListener('click', () => {
-        searchMenu.close()
+    optionsCancel.addEventListener('click', () => {
+        optionsMenu.close()
     })
 }
 
-searchButton.addEventListener('click', showSearchMenu)
+optionsButton.addEventListener('click', showOptionsMenu)
+
+const searchButton = document.querySelector('[data-search-overlay] [type="submit"]')
+const searchData = document.querySelector('[data-search-form]')
+
+const filter = (event) => { 
+    event.preventDefault()
+    const formData = new FormData(searchData)
+    const filters = Object.fromEntries(formData)
+    console.log(filters);
+    const result = []
+
+    for (const book of books) {
+        const titleMatch = filters.title.trim() && book.title.toLowerCase().includes(filters.title.toLowerCase())
+        let authorMatch = true
+        let genreMatch = true
+
+        if (filters.author !== 'any') {
+            authorMatch = books.author === filters.author
+        }
+
+        if (filters.genre !== 'any') {
+            for (const singleGenre of book.genres) {
+                genreMatch = singleGenre === filters.genre
+            }
+        }
+
+        console.log(`
+        titleMatch ${titleMatch}
+        authorMatch ${authorMatch}
+        genreMatch ${genreMatch}
+        `);
+    }
+
+    optionsMenu.close()
+}
+
+searchButton.addEventListener('click', filter)
 
 // data-search-form.click(filters) {
 //     preventDefault()
