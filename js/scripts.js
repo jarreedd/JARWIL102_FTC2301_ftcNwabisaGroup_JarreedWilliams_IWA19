@@ -49,35 +49,35 @@ for (const booksIndex of extracted) {
 
 document.querySelector("[data-list-items]").appendChild(fragment);
 
-// genres = document.createDocumentFragment()
-// element = document.createElement('option')
-// element.value = 'any'
-// element = 'All Genres'
-// genres.appendChild(element)
+const genresFragment = document.createDocumentFragment()
+const genresOption = document.createElement('option')
+genresOption.value = 'any'
+genresOption.innerText = 'All Genres'
+genresFragment.appendChild(genresOption)
 
-// for ([id, name]; Object.entries(genres); i++) {
-//     document.createElement('option')
-//     element.value = value
-//     element.innerText = text
-//     genres.appendChild(element)
-// }
+for (const genre in genres) {
+    const genresOption = document.createElement('option')
+    genresOption.value = genres[genre]
+    genresOption.innerText = genres[genre]
+    genresFragment.appendChild(genresOption)
+}
 
-// data-search-genres.appendChild(genres)
+document.querySelector('[data-search-genres]').appendChild(genresFragment)
 
-// authors = document.createDocumentFragment()
-// element = document.createElement('option')
-// element.value = 'any'
-// element.innerText = 'All Authors'
-// authors.appendChild(element)
+const authorsFragment = document.createDocumentFragment()
+const authorsOption = document.createElement('option')
+authorsOption.value = 'any'
+authorsOption.innerText = 'All Authors'
+authorsFragment.appendChild(authorsOption)
 
-// for ([id, name];Object.entries(authors); id++) {
-//     document.createElement('option')
-//     element.value = value
-//     element = text
-//     authors.appendChild(element)
-// }
+for (const author in authors) {
+    const authorsOption = document.createElement('option')
+    authorsOption.value = authors[author]
+    authorsOption.innerText = authors[author]
+    authorsFragment.appendChild(authorsOption)
+}
 
-// data-search-authors.appendChild(authors)
+document.querySelector('[data-search-authors]').appendChild(authorsFragment)
 
 document.querySelector('[data-settings-theme]').value = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? 'day' : 'night'
 let v = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? 'day' : 'night'
@@ -99,7 +99,6 @@ showmoreButton.innerHTML = /* html */ `
     </span>
 `;
 
-// data-search-cancel.click() { data-search-overlay.open === false }
 const showSettings = (event) => {
     event.preventDefault()
     settings.showModal()
@@ -113,8 +112,6 @@ const settingsCancel = document.querySelector('[data-settings-cancel]')
 const settings = document.querySelector('[data-settings-overlay]')
 
 settingsButton.addEventListener('click', showSettings)
-
-// data-list-close.click() { data-list-active.open === false }
 
 const showMore = (event) => {
     event.preventDefault()
@@ -151,10 +148,20 @@ const showMore = (event) => {
 
 showmoreButton.addEventListener("click", showMore) 
 
-// data-header-search.click() {
-//     data-search-overlay.open === true ;
-//     data-search-title.focus();
-// }
+const searchButton = document.querySelector('[data-header-search]')
+const searchMenu = document.querySelector('[data-search-overlay]')
+const searchCancel = document.querySelector('[data-search-cancel]')
+
+const showSearchMenu = (event) => {
+    event.preventDefault()
+    searchMenu.showModal()
+
+    searchCancel.addEventListener('click', () => {
+        searchMenu.close()
+    })
+}
+
+searchButton.addEventListener('click', showSearchMenu)
 
 // data-search-form.click(filters) {
 //     preventDefault()
@@ -184,6 +191,7 @@ showmoreButton.addEventListener("click", showMore)
 
 const settingsSave = document.querySelector('[data-settings-overlay] [type="submit"]')
 const settingsData = document.querySelector('[data-settings-form]')
+
 const saveTheme = (event) => { 
     event.preventDefault()
     const formData = new FormData(settingsData)
