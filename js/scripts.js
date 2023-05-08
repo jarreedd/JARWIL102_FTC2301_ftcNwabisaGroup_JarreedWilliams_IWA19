@@ -1,5 +1,31 @@
 import { books, genres, authors, BOOKS_PER_PAGE} from "./data.js";
 
+/* GLOBAL VARIABLES */
+let matches = books
+let page = 1;
+const amountPages = Math.ceil(matches.length / BOOKS_PER_PAGE)
+const lastPage = matches.length % BOOKS_PER_PAGE
+
+let range = {
+    start : (page - 1) * BOOKS_PER_PAGE,
+    end : BOOKS_PER_PAGE * page
+}
+
+let extracted = matches.slice(range.start, range.end)
+let initial
+let hasRemaining
+
+const css = {
+    night : {
+        dark: '255, 255, 255',
+        light: '10, 10, 20'
+    },
+    day : {
+        dark: '10, 10, 20',
+        light: '255, 255, 255'
+    }
+}
+
 /* FUNCTIONS */
 
 const createPreview = (props) => {
@@ -24,27 +50,33 @@ const createPreview = (props) => {
 };
 
 const updateRemaining = () => {
-    const remaining = books.length - (BOOKS_PER_PAGE * page)
-    return remaining;
+    initial = matches.length - (BOOKS_PER_PAGE * page)
+    hasRemaining = initial > 0 ? initial : 0
+    if (hasRemaining === 0) {
+        showMoreButton.disabled = true
+    }
 }
 
 const showMore = (event) => {
     event.preventDefault()
     page += 1
-    const remaining = updateRemaining()
-    const hasRemaining = remaining > 0 ? remaining : 0
 
-    const rangeStart = (page - 1) * BOOKS_PER_PAGE
-    const rangeEnd = books.length - remaining
-    extracted = books.slice(rangeStart, rangeEnd)
+    range = {
+        start : (page - 1) * BOOKS_PER_PAGE,
+        end : BOOKS_PER_PAGE * page
+    }
+
+    extracted = matches.slice(range.start, range.end)
+
+    updateRemaining()
 
     if (hasRemaining > 0) {
         for (const booksIndex of extracted) {
             const preview = createPreview(booksIndex)
-            fragment.appendChild(preview)
+            previewFragment.appendChild(preview)
         }
         
-        listBooks.appendChild(fragment);
+        listBooks.appendChild(previewFragment);
         
         const previewList = document.querySelectorAll('.preview')
         const previewArray = Array.from(previewList)
@@ -54,7 +86,7 @@ const showMore = (event) => {
     }
     
     showMoreButton.innerHTML = /* html */ `
-    Show more 
+    <span>Show more </span>
     <span class="list__remaining">
         (${hasRemaining})
     </span>
@@ -79,9 +111,9 @@ const filter = (event) => {
     let result = []
 
     for (const book of books) {
-        let titleMatch
-        let authorMatch
-        let genreMatch
+        let titleMatch = true
+        let authorMatch = true
+        let genreMatch = true
 
         if (filters.title !== '') {
             titleMatch = book.title.toLowerCase().includes(filters.title.toLowerCase())
@@ -97,7 +129,7 @@ const filter = (event) => {
             }
         }
 
-        if (titleMatch || authorMatch || genreMatch) {
+        if (titleMatch && authorMatch && genreMatch) {
             result.push(book)
         } 
 
@@ -105,35 +137,39 @@ const filter = (event) => {
 
     matches = result
 
+    if (result.length < 1) {
+        console.log('No results found. Your filters might be too narrow.');
+        listMessage.classList.add('list__message_show');
+    } else {
+        listMessage.classList.remove('list__message_show')
+    }
+    
+
+    listBooks.innerHTML = ''
+    extracted = matches.slice(range.start, range.end)
+
+    const previewFragment = document.createDocumentFragment()
+    for (const booksIndex of extracted) {
+        const preview = createPreview(booksIndex)
+        previewFragment.appendChild(preview)
+    }
+    listBooks.appendChild(previewFragment);
+
+    const previewList = document.querySelectorAll('.preview')
+    const previewArray = Array.from(previewList)
+    for (const preview of previewArray) {
+        preview.addEventListener('click', activePreview)
+    }
+
+    updateRemaining()
+    showMoreButton.innerHTML = /* html */ `
+        <span>Show more</span>
+        <span class="list__remaining"> (${hasRemaining})</span>
+    `
+
     window.scrollTo({ top: 0, behavior: 'smooth' })
     searchMenu.close()
 }
-
-// data-search-form.click(filters) {
-//     preventDefault()
-//     const formData = new FormData(event.target)
-//     const filters = Object.fromEntries(formData)
-//     result = []
-
-//     for (book; booksList; i++) {
-//         titleMatch = filters.title.trim() = '' && book.title.toLowerCase().includes[filters.title.toLowerCase()]
-//         authorMatch = filters.author = 'any' || book.author === filters.author
-
-//         {
-//             genreMatch = filters.genre = 'any'
-//             for (genre; book.genres; i++) { if singleGenre = filters.genre { genreMatch === true }}}
-//         }
-
-//         if titleMatch && authorMatch && genreMatch => result.push(book)
-//     }
-
-//     if display.length < 1 
-//     data-list-message.class.add('list__message_show')
-//     else data-list-message.class.remove('list__message_show')
-    
-//     window.scrollTo({ top: 0, behavior: 'smooth' });
-//     data-search-overlay.open = false
-// }
 
 const showSettings = (event) => {
     event.preventDefault()
@@ -216,34 +252,17 @@ const settingsTheme = document.querySelector('[data-settings-theme]')
 const settingsCancel = document.querySelector('[data-settings-cancel]')
 const settingsSave = document.querySelector('[data-settings-overlay] [type="submit"]')
 
-/* GLOBAL VARIABLES AND LOGIC */
+/* LOGIC */
 
-let matches = books
-let page = 1;
+if (!books && !Array.isArray(books)) throw new Error('Source required') 
+if (!range && range.length < 2) throw new Error('Range must be an array with two numbers')
 
-// if (!books && !Array.isArray(books)) throw new Error('Source required') 
-// if (!range && range.length < 2) throw new Error('Range must be an array with two numbers')
-
-const css = {
-    night : {
-        dark: '255, 255, 255',
-        light: '10, 10, 20'
-    },
-    day : {
-        dark: '10, 10, 20',
-        light: '255, 255, 255'
-    }
-}
-
-const fragment = document.createDocumentFragment()
-let extracted = books.slice(0, BOOKS_PER_PAGE) // books => matches
-
+const previewFragment = document.createDocumentFragment()
 for (const booksIndex of extracted) {
     const preview = createPreview(booksIndex)
-    fragment.appendChild(preview)
+    previewFragment.appendChild(preview)
 }
-
-listBooks.appendChild(fragment);
+listBooks.appendChild(previewFragment);
 
 const genresFragment = document.createDocumentFragment()
 const genresOption = document.createElement('option')
@@ -257,7 +276,6 @@ for (const genre in genres) {
     genresOption.innerText = genres[genre]
     genresFragment.appendChild(genresOption)
 }
-
 searchGenres.appendChild(genresFragment)
 
 const authorsFragment = document.createDocumentFragment()
@@ -272,7 +290,6 @@ for (const author in authors) {
     authorsOption.innerText = authors[author]
     authorsFragment.appendChild(authorsOption)
 }
-
 searchAuthors.appendChild(authorsFragment)
 
 settingsTheme.value = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? 'day' : 'night'
@@ -284,7 +301,7 @@ document.documentElement.style.setProperty('--color-light', css[v].light);
 showMoreButton.innerHTML = /* html */ `
     Show more 
     <span class="list__remaining">
-        (${updateRemaining()})
+        (${hasRemaining})
     </span>
 `;
 
