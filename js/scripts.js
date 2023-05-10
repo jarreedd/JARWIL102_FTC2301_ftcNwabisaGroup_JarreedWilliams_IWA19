@@ -298,6 +298,7 @@ let v = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').m
 document.documentElement.style.setProperty('--color-dark', css[v].dark);
 document.documentElement.style.setProperty('--color-light', css[v].light);
 
+updateRemaining()
 showMoreButton.innerHTML = /* html */ `
     Show more 
     <span class="list__remaining">
