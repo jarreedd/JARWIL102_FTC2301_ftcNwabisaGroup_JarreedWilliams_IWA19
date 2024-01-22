@@ -6,6 +6,7 @@ export const createPreview = (props) => {
     const element = document.createElement("button");
     element.classList.add("preview");
     element.dataset.preview = id;
+    
     element.innerHTML = /* html */ `
         <img 
             class="preview__image" 
