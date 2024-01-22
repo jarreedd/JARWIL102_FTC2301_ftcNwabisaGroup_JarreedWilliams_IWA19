@@ -1,5 +1,3 @@
-export const BOOKS_PER_PAGE = 36;
-
 export const authors = {
   "194e164b-9365-4358-b44a-f28a93cc528f": "Steven D. Levitt",
   "76e8065c-fd7a-4a8b-a8ea-6105a47d0781": "Stephen J. Dubner",
